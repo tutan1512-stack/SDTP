@@ -1,6 +1,6 @@
 # файл для генерации справочных материалов
 
-import sdtp_db.model as bd
+import model as bd
 import backend.services as df
 
 session = bd.Session()

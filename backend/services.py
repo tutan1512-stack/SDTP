@@ -1,6 +1,6 @@
 # файл со служебными функциями
 
-import sdtp_db.model as bd
+import model as bd
 from typing import TypeVar
 from datetime import datetime, date
 from sqlalchemy import (

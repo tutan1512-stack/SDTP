@@ -1,6 +1,6 @@
 # файл для проведения расчетов
 
-import sdtp_db.model as bd
+import model as bd
 from sqlalchemy import func, select
 from math import sqrt
 
