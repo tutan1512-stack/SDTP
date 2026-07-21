@@ -170,13 +170,13 @@ def add_tested_pile():
         "number":int(input("[1] Номер испытательной сваи: ")),
         "type_p_id": utils.choose(
             bd.TypePile,
-            "Выберите тип сваи",
+            "[2] Выберите тип сваи",
             lambda x: f"{x.name}-{x.marka_reinfor}"
         ),
 
         "prd_id": utils.choose(
             bd.Producer,
-            "Выберите производителя",
+            "[3] Выберите производителя",
             "name"
         ),
         "date_manufacture": df.to_date(input("[4] Дата производства (дд,мм,гггг): "))
