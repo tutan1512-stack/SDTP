@@ -2,7 +2,7 @@
 
 import backend.services as df
 import utils as utils
-import sdtp_db.model as bd
+import model as bd
 from sqlalchemy import  select
 
 

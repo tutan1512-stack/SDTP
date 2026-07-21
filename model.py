@@ -1,4 +1,3 @@
-from pathlib import Path # Для создания абсолютного пути
 from typing import TypeVar # Для использования шаблонов
 from datetime import date# Тип данных времени
 from sqlalchemy import (
@@ -18,6 +17,7 @@ from sqlalchemy.orm import (
                             relationship
 
 )
+from utils import get_appdata_db_path
 # Абстрактный класс
 class Base(DeclarativeBase):
     pass
@@ -26,11 +26,11 @@ class Base(DeclarativeBase):
 T = TypeVar("T")
 
 # Создание абсолютного пути до бд
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "sdtp.bd"
+#BASE_DIR = Path(__file__).resolve().parent
+#DB_PATH = BASE_DIR / "sdtp.bd"
 
 # Подключаем бд без логирования
-engine = create_engine(f'sqlite:///{DB_PATH}', echo = False)
+engine = create_engine(f'sqlite:///{get_appdata_db_path()}', echo = False)
 
 # Дла работы с несколькими сессиями
 Session = sessionmaker(bind=engine)

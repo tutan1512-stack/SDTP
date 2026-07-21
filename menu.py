@@ -1,14 +1,8 @@
 # Функции интерфейса,  CRUD
-import sdtp_db.model as bd
+import model as bd
 import crud as crud
 import utils as utils
-from typing import TypeVar
-from datetime import datetime, date
-from sqlalchemy import (
-                        create_engine,
-                        func,
-                        select
- )
+
 
 MODELS = {
     1: ("Типы свай", bd.TypePile),
