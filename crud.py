@@ -345,8 +345,12 @@ def add_producer():
     utils.title("Добавление производителя")
     data = {
         "name": input("[1] Название организации: "),
-        "id_category": input("[2] Категория производителя: "),
-        "contact_name": input("[3] Контактное лицо: "),
+        "id_category": utils.choose(
+            bd.CategoryProducer,
+            "[2] Категория производителя: ",
+            lambda x: f"{x.id_category}"
+        ),
+        "contact_name": input("\n[3] Контактное лицо: "),
         "email": input("[4] Электронная почта: "),
         "phone": input("[5] Телефон: +7"),
         "date_contract": df.to_date(input("[6] Дата начала сотрудничества (дд.мм.гггг): ")),
@@ -378,8 +382,12 @@ def add_transport():
     utils.title("Добавление транспорта")
     data = {
         "name": input("[1] Название транспорта: "),
-        "id_category": input("[2] Категория транспорта: "),
-        "state": input("[3] Статус: ")
+        "id_category": utils.choose(
+            bd.CategoryTransport,
+            "[2] Категория производителя: ",
+            lambda x: f"{x.id_category}"
+        ),
+        "state": input("\n[3] Статус: ")
     }
     df.defends_create(session, bd.Transport,"name", **data)
     print("\n[+] Транспорт успешно добавлен!")
