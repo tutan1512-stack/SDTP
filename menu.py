@@ -2,7 +2,7 @@
 import model as bd
 import crud as crud
 import utils as utils
-
+import traceback
 
 MODELS = {
     1: ("Типы свай", bd.TypePile),
@@ -76,5 +76,12 @@ def main():
             break
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        with open("error.log", "w", encoding="utf-8") as f:
+            traceback.print_exc(file=f)
+
+        print("[!] Произошла ошибка. Подробности записаны в error.log")
+        input("[>] Нажмите Enter...")
 

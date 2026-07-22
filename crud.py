@@ -197,25 +197,24 @@ def add_dynamic_test():
             "[3] Выберите объект",
             "name_object"
         ),
-
         "employee_id":  utils.choose(
             bd.Employee,
-            "\n[4] Выберите ответственного",
+            "[4] Выберите ответственного",
             lambda x: f"{x.last_name} {x.first_name} {x.second_name}"
         ),
 
-        "date_start": df.to_date(input("\n[5] Начало испытаний: (дд.мм.гггг)")),
-        "date_finish": df.to_date(input("\n[6] Конец испытаний: (дд.мм.гггг)")),
+        "date_start": df.to_date(input("[5] Начало испытаний (дд.мм.гггг): ")),
+        "date_finish": df.to_date(input("[6] Конец испытаний (дд.мм.гггг): ")),
 
         "transport_id":  utils.choose(
             bd.Transport,
-            "\n[7] Выберите копер",
+            "[7] Выберите копер",
             "name"
         ),
 
         "hammer_id":  utils.choose(
             bd.Hammer,
-            "\n[8] Выберите молот",
+            "[8] Выберите молот",
             "name"
         )
     }
@@ -227,8 +226,11 @@ def add_dynamic_test():
     )
 
     tested = df.defends_create(session,bd.DynamicTested,"number_tested", **data)
-    print("\n[9] Добавление свай (0 - закончить)\n")
-
+    utils.choose(
+        bd.TestedPile,
+        "[9] Добавление свай (0 - закончить):\n",
+        lambda x: f"Испытуемая свая №{x.number}"
+    ),
     while True:
         pile_number = int(input("[>] Номер сваи: "))
         if pile_number == 0:
@@ -260,13 +262,18 @@ def add_dynamic_test():
 def add_driving_log():
     session = bd.Session()
     utils.title("Добавление данных по забивке")
+    tested_id=  utils.choose(
+        bd.DynamicTested,
+        "[1] Выберите испытания: ",
+        lambda x: f"{x.number_tested}: {x.name_piot}"
+    )
+    tested_pile_id = utils.choose(
+        bd.TestedPileInTest,
+        "[2] Выберите испытуемую сваю" ,
+        lambda x: f"Испытание №{x.tested.number_tested} → Свая №{x.pile.number}"
+    )
     data = {
-        "tested_id": input("[1] Испытание: "),
-        "tested_pile_id": utils.choose(
-            bd.TestedPileInTest,
-            "[2] Выберите испытуемую сваю",
-            lambda x: f"Испытание №{x.tested.number_tested} → Свая №{x.pile.number}" ),
-        "step_number": int(input("\n[3] Номер этапа: ")),
+        "tested_pile_id": tested_pile_id,
         "deep_driving": float(input("[4] Глубина погружения (м): ")),
         "count_hit": int(input("[5] Количество ударов: ")),
         "lift_hammer": float(input("[6] Высота подъема молота (м): ")),
@@ -274,9 +281,17 @@ def add_driving_log():
         "count_all_hit": int(input("[8] Общее количество ударов: ")),
         "note": input("[9] Примечание: ")
     }
-
-    df.create_log(session, bd.DrivingLog, **data)
-    print("\n[+] Данные по забивке были добавлены!")
+    data["step_number"] = df.get_next_step(
+        session,
+        bd.DrivingLog,
+        tested_pile_id
+    )
+    try:
+        df.create_log(session, bd.DrivingLog, **data)
+        print("\n[+] Данные по забивке были добавлены!")
+    except Exception as e:
+        print(e)
+        raise
     utils.pause()
     session.close()
 
@@ -303,14 +318,17 @@ def add_absolut_mark():
 def add_redriving_log():
     session = bd.Session()
     utils.title("Добавление данных по добивке")
-
+    tested_id=  utils.choose(
+        bd.DynamicTested,
+        "[1] Выберите испытания: ",
+        lambda x: f"{x.number_tested}: {x.name_piot}"
+    )
+    tested_pile_id = utils.choose(
+        bd.TestedPileInTest,
+        "[2] Выберите испытуемую сваю" ,
+        lambda x: f"Испытание №{x.tested.number_tested} → Свая №{x.pile.number}"
+    )
     data = {
-        "tested_id": input("[1] Номер испытания: "),
-        "tested_pile_id": utils.choose(
-            bd.TestedPileInTest,
-            "[2] Выберите испытуемую сваю",
-            lambda x: f"Испытание №{x.tested.number_tested} → Свая №{x.pile.number}"),
-        "step_number": int(input("[3] Номер этапа: ")),
         "date": df.to_date(input("[4] Дата добивки (дд.мм.гггг): ")),
         "time_sleep": int(input("[5] Время отдыха (суток): ")),
         "deep_driving": float(input("[6] Глубина добивки (см): ")),
@@ -318,6 +336,11 @@ def add_redriving_log():
         "lift_hammer": int(input("[8] Высота подъема молота (см): ")),
         "average_failure": float(input("[9] Средний отказ (см): "))
     }
+    data["step_number"] = df.get_next_step(
+        session,
+        bd.RedrivingLog,
+        tested_pile_id
+    )
     df.create_log(session, bd.RedrivingLog, **data)
     print("\n[+] Данные по добивке были успешно добавлены!")
     utils.pause()
@@ -348,7 +371,7 @@ def add_producer():
         "id_category": utils.choose(
             bd.CategoryProducer,
             "[2] Категория производителя: ",
-            lambda x: f"{x.id_category}"
+           "name"
         ),
         "contact_name": input("\n[3] Контактное лицо: "),
         "email": input("[4] Электронная почта: "),
@@ -385,7 +408,7 @@ def add_transport():
         "id_category": utils.choose(
             bd.CategoryTransport,
             "[2] Категория производителя: ",
-            lambda x: f"{x.id_category}"
+            "name"
         ),
         "state": input("\n[3] Статус: ")
     }
