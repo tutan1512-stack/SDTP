@@ -1,4 +1,3 @@
-from pathlib import Path # Для создания абсолютного пути
 from typing import TypeVar # Для использования шаблонов
 from datetime import date# Тип данных времени
 from sqlalchemy import (
@@ -18,6 +17,7 @@ from sqlalchemy.orm import (
                             relationship
 
 )
+from utils import get_appdata_db_path
 # Абстрактный класс
 class Base(DeclarativeBase):
     pass
@@ -26,11 +26,11 @@ class Base(DeclarativeBase):
 T = TypeVar("T")
 
 # Создание абсолютного пути до бд
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "sdtp.bd"
+#BASE_DIR = Path(__file__).resolve().parent
+#DB_PATH = BASE_DIR / "sdtp.bd"
 
 # Подключаем бд без логирования
-engine = create_engine(f'sqlite:///{DB_PATH}', echo = False)
+engine = create_engine(f'sqlite:///{get_appdata_db_path()}', echo = False)
 
 # Дла работы с несколькими сессиями
 Session = sessionmaker(bind=engine)
@@ -100,7 +100,7 @@ class TestedPile(Base):
                 f"Номер записи: {self.id!r}\n\t"
                 f"Свая №: {self.number!r}\n\t"                
                 f"Тип сваи: {self.type_p.name+'-'+self.type_p.marka_reinfor!r}\n\t"
-                f"Дата производства: {self.date_manufacture!r}\n\t"
+                f"Дата производства: {self.date_manufacture}\n\t"
                 f"Производитель :{self.producers.name!r}\n\t"
         )
 
@@ -159,8 +159,8 @@ class DynamicTested(Base):
                 f"Пункт: {self.name_piot!r}\n\t"
                 f"Объект: {self.b_object.name_object!r}\n\t"
                 f"Ответственный: {self.employee.last_name+' '+self.employee.first_name+' '+self.employee.second_name!r}\n\t"
-                f"Начало испытаний: {self.date_start!r} \n\t"
-                f"Конец испытаний: {self.date_finish!r}\n\t"
+                f"Начало испытаний: {self.date_start} \n\t"
+                f"Конец испытаний: {self.date_finish}\n\t"
                 f"Копер: на базе {self.transport.name!r}\n\t"
                 f"Молот: {self.hammer.name!r}\n\t"
         )
@@ -245,7 +245,7 @@ class RedrivingLog(Base):
                 f"Номер испытаний: №{self.tested_pile.tested.number_tested!r}\n\t"
                 f"Номер сваи: №{self.tested_pile.pile.number!r}\n\t"
                 f"Номер этапа: {self.step_number!r}\n\t"      
-                f"Дата испытаний: №{self.date!r}\n\t"
+                f"Дата испытаний: №{self.date}\n\t"
                 f"Время отдыха: {self.time_sleep!r} д\n\t"                
                 f"Глубина забивки (см): {self.deep_driving!r}\n\t"
                 f"Количество ударов: {self.count_hit!r}\n\t"
@@ -314,7 +314,7 @@ class Producer(Base):
                 f"Контактное имя: {self.contact_name!r}\n\t"
                 f"Контактная почта: {self.email!r}\n\t"
                 f"Контактный телефон: +7{self.phone!r}\n\t"
-                f"Начало сотрудничества: {self.date_contract!r} \n\t"
+                f"Начало сотрудничества: {self.date_contract} \n\t"
                 f"Физический адрес: {self.physical_address!r}\n\t"
                 f"ОГРН: {self.ogrn!r} \n\t"
                 f"ИНН: {self.inn!r}\n\t"

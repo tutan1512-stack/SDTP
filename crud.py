@@ -2,7 +2,7 @@
 
 import backend.services as df
 import utils as utils
-import sdtp_db.model as bd
+import model as bd
 from sqlalchemy import  select
 
 
@@ -176,10 +176,10 @@ def add_tested_pile():
 
         "prd_id": utils.choose(
             bd.Producer,
-            "[3] Выберите производителя",
+            "\n[3] Выберите производителя",
             "name"
         ),
-        "date_manufacture": df.to_date(input("[4] Дата производства (дд,мм,гггг): "))
+        "date_manufacture": df.to_date(input("\n[4] Дата производства (дд,мм,гггг): "))
     }
     df.defends_create(session,bd.TestedPile,"number", **data)
     print("\n[+] Испытательная свая  была добавлена!")
@@ -200,22 +200,22 @@ def add_dynamic_test():
 
         "employee_id":  utils.choose(
             bd.Employee,
-            "[4] Выберите ответственного",
+            "\n[4] Выберите ответственного",
             lambda x: f"{x.last_name} {x.first_name} {x.second_name}"
         ),
 
-        "date_start": df.to_date(input("[5] Начало испытаний: (дд.мм.гггг)")),
-        "date_finish": df.to_date(input("[6] Конец испытаний: (дд.мм.гггг)")),
+        "date_start": df.to_date(input("\n[5] Начало испытаний: (дд.мм.гггг)")),
+        "date_finish": df.to_date(input("\n[6] Конец испытаний: (дд.мм.гггг)")),
 
         "transport_id":  utils.choose(
             bd.Transport,
-            "Выберите копер",
+            "\n[7] Выберите копер",
             "name"
         ),
 
         "hammer_id":  utils.choose(
             bd.Hammer,
-            "Выберите молот",
+            "\n[8] Выберите молот",
             "name"
         )
     }
@@ -227,7 +227,7 @@ def add_dynamic_test():
     )
 
     tested = df.defends_create(session,bd.DynamicTested,"number_tested", **data)
-    print("\nДобавление свай (0 - закончить)\n")
+    print("\n[9] Добавление свай (0 - закончить)\n")
 
     while True:
         pile_number = int(input("[>] Номер сваи: "))
@@ -253,7 +253,7 @@ def add_dynamic_test():
         session.commit()
         print(f"[+] Свая №{pile.number} добавлена.")
 
-    print("\n[=] Испытание успешно создано.")
+    print("\n[+] Испытание успешно создано.")
     utils.pause()
     session.close()
 
@@ -266,7 +266,7 @@ def add_driving_log():
             bd.TestedPileInTest,
             "[2] Выберите испытуемую сваю",
             lambda x: f"Испытание №{x.tested.number_tested} → Свая №{x.pile.number}" ),
-        "step_number": int(input("[3] Номер этапа: ")),
+        "step_number": int(input("\n[3] Номер этапа: ")),
         "deep_driving": float(input("[4] Глубина погружения (м): ")),
         "count_hit": int(input("[5] Количество ударов: ")),
         "lift_hammer": float(input("[6] Высота подъема молота (м): ")),
@@ -368,7 +368,7 @@ def add_category_producer():
         "description": input("[2] Описание категории: ")
     }
     df.defends_create(session, bd.CategoryProducer,"name", **data)
-    print("[=] Категория производителя успешно добавлена!")
+    print("\n[+] Категория производителя успешно добавлена!")
     utils.pause()
     session.close()
 
