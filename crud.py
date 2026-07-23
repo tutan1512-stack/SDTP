@@ -107,6 +107,93 @@ def add_menu():
             utils.pause()
 
 
+WORK = {
+    1: (" Испытуемые сваи", bd.TestedPile),
+    2: (" Динамические испытания", bd.DynamicTested),
+    3: (" Забивка", bd.DrivingLog),
+    4: (" Добивка", bd.RedrivingLog),
+    5: (" Абсолютные отметки", bd.AbsolutMark),
+    6: (" Грунты", bd.Solid),
+}
+
+GUIDE = {
+    1: (" Типы свай", bd.TypePile),
+    2: (" Сотрудники", bd.Employee),
+    3:  (" Производители", bd.Producer),
+    4: (" Транспорт", bd.Transport),
+    5: (" Молоты", bd.Hammer),
+    6: (" Объекты", bd.BuildObject),
+    7: (" Категории производителей", bd.CategoryProducer),
+    8: (" Категории транспорта", bd.CategoryTransport),
+}
+
+MODELS = {
+    1: (" Рабочая группа ", WORK),
+    2: (" Справочники ",GUIDE)
+}
+def database_menu():
+    utils.clear()
+    while True:
+        title("Просмотр базы данных")
+        for key, (title, _) in MODELS.items():
+            print(f"[{key}]{title}")
+        print("\n[0] Назад")
+        try:
+            c = int(input("\n[>] Введите номер группы: "))
+        except:
+            continue
+        if c==0:
+            return
+    if c in MODELS:
+            utils.clear()
+
+            if c == 1:
+                while True:
+                    title("Просмотр рабочей группы")
+                    for key, (title, _) in WORK.items():
+                        print(f"[{key}]{title}")
+                    print("\n[0] Назад")
+                    try:
+                        c = int(input("\n[>] Введите номер категории: "))
+                    except:
+                        continue
+                    if c == 0:
+                        return
+                    if c in WORK:
+                        utils.clear()
+                        utils.show_table(WORK[c][1])
+
+            elif c == 2:
+                while True:
+                    title("Просмотр справочников")
+                    for key, (title, _) in GUIDE.items():
+                        print(f"[{key}]{title}")
+                    print("\n[0] Назад")
+                    try:
+                        c = int(input("\n[>] Введите номер категории: "))
+                    except:
+                        continue
+                    if c == 0:
+                        return
+                    if c in GUIDE:
+                        utils.clear()
+                        utils.show_table(GUIDE[c][1])
+
+def delete_menu():
+    while True:
+        utils.title("Удаление записи")
+        for key, value in MODELS.items(): # выводим из модели парключи
+            print(f"[{key}] {value[0]}")
+        print("\n[0] Назад")
+        try:
+            c = int(input("\n[>] Выберите категорию: "))
+        except:
+            continue
+        if c==0:
+            return
+        if c in MODELS:
+            utils.delete_record(MODELS[c][1])
+
 # Функции создания словарей
 def add_employee():
     session = bd.Session()

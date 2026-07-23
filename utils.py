@@ -3,6 +3,17 @@
 import model as bd
 import os, sys
 
+FOREIGN = {
+    "type_p_id": bd.TypePile,
+    "prd_id":  bd.Producer,
+    "object_id":  bd.BuildObject,
+    "employee_id":  bd.Employee,
+    "transport_id":  bd.Transport,
+    "hammer_id":  bd.Hammer,
+    "tested_id":  bd.DynamicTested,
+    "tested_pile_id":  bd.TestedPile,
+}
+
 def get_appdata_db_path(app_name="MyPythonApp", db_name="database.db"):
     if getattr(sys, 'frozen', False):
         # На Windows os.getenv('APPDATA') ведет в C:\Users\Имя\AppData\Roaming
