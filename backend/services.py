@@ -13,16 +13,6 @@ T = TypeVar("T")
 # Дла работы с несколькими сессиями
 session = bd.Session()
 
-# функция для поиска по атрибуту
-def search(db_session: session, model, attribute, value):
-    found =  getattr(model, attribute, None)
-    if found is None:
-        AttributeError(f"[!] Атрибут {attribute} ненайден в модели {model.__name__}")
-
-    return db_session.scalars(
-        select(model)
-       .where(found==value)).all()
-
 # функция для конвертации временных данных
 def to_date(value):
     if isinstance(value, date):
@@ -32,10 +22,6 @@ def to_date(value):
         return datetime.strptime(value, "%d.%m.%Y").date()
 
     raise TypeError(f"[!] Неверный тип: {type(value)}")
-
-# вывод данных (всех, в рамках одного класса)
-def get_element(db_session: session, model: type[T]) -> list[T]:
-    return db_session.scalars(select(model)).all()
 
 # Универсальная функция для добавления записей
 def save(db_session, obj):

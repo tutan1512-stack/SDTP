@@ -1,200 +1,158 @@
-# Функции CRUD для работы с меню
-
+# Функции CRUD для работы в меню
 import backend.services as df
-import utils as utils
+import backend.utils as utils
 import model as bd
 from sqlalchemy import  select
 
-
-FOREIGN = {
-    "type_p_id": bd.TypePile,
-    "prd_id":  bd.Producer,
-    "object_id":  bd.BuildObject,
-    "employee_id":  bd.Employee,
-    "transport_id":  bd.Transport,
-    "hammer_id":  bd.Hammer,
-    "tested_id":  bd.DynamicTested,
-    "tested_pile_id":  bd.TestedPile,
+def get_groups():
+    return {
+        1: {"title": "Рабочая группа", "items": get_work(), },
+        2: {"title": "Справочники", "items": get_guide(), }
+}
+def get_action():
+    return {
+        1: {"title": " Просмотр записей ", "func": utils.show_table},
+        2: {"title": " Найти запись", "func": utils.search_menu},
+        3: {"title": "Добавить запись", "func": utils.add_record},
+        4: {"title": " Удалить запись", "func": utils.delete_record},
 }
 
-def get_all(model):
-    session =  bd.Session()
-    try:
-        return session.query(model).all()
-    finally:
-        session.close()
+def get_work():
+    return  {
+        1: {
+                "title": " Испытуемые сваи",
+                "model": bd.TestedPile,
+                "add":add_tested_pile,
+                "search": {
+                    1: ("Номер сваи", "number"),
+                    2: ("Дата изготовления", "date_manufacture")
+                }
+            },
 
-def get_by_id(model, index):
-    session =  bd.Session()
-    try:
-        return session.get(model, index)
-    finally:
-        session.close()
+        2: {
+                "title": " Динамические испытания",
+                "model": bd.DynamicTested,
+                "add":add_dynamic_test,
+                "search": {
+                    1: ("Номер испытания", "number_tested"),
+                    2: ("Дата испытаний", "date_start"),
+                }
+            },
 
+        3: {
+                "title": " Забивка",
+                "model": bd.DrivingLog,
+                "add":add_driving_log,
+                "search": {
+                    1: ("Номер испытания", "number_tested"),
+                    2: ("Номер этапа", "step_number"),
+                }
+            },
 
-def add_menu():
-    while True:
-        utils.title("Добавление записи")
+        4: {
+                "title": " Добивка",
+                "model": bd.RedrivingLog,
+                "add":add_redriving_log,
+                "search": {
+                    1: ("Номер испытания", "number_tested"),
+                    2: ("Дата испытаний", "date"),
+                }
+            },
 
-        print("[1] Типы свай")
-        print("[2] Испытуемые сваи")
-        print("[3] Динамические испытания")
-        print("[4] Забивка")
-        print("[5] Добивка")
-        print("[6] Абсолютные отметки")
-        print("[7] Производители")
-        print("[8] Категории производителей")
-        print("[9] Транспорт")
-        print("[10] Категории транспорта")
-        print("[11] Молоты")
-        print("[12] Объекты")
-        print("[13] Грунты")
-        print("[14] Сотрудники")
-        print("\n[0] Назад")
+        5: {
+                "title": " Абсолютные отметки",
+                "model": bd.AbsolutMark,
+                "add":add_absolut_mark,
+                "search": {
+                    1: ("Номер испытания", "number_tested"),
+                }
+         },
 
-        try:
-            cmd = int(input("\n[>] Введите номер: "))
-        except ValueError:
-            continue
+        6: {
+                "title": " Грунты",
+                "model":bd.Solid,
+                "add":add_solid,
+                "search": {
+                    1: ("Номер испытания", "number_tested"),
+                    2: ("Названия объекта", "name_object"),
+                },
+            }
+    }
 
-        if cmd == 0:
-            return
+def get_guide():
+    return {
+        1: {
+            "title": "Типы свай",
+            "model": bd.TypePile,
+            "add": add_pile,
+            "search": {
+                1: ("Марка сваи", "name"),
+                2: ("Тип сваи", "type"),
+            }
+        },
 
-        elif cmd == 1:
-             add_pile()
+        2: {
+            "title": "Сотрудники",
+            "model": bd.Employee,
+            "add": add_employee,
+            "search": {
+                1: ("Фамилия", "last_name"),
+                2: ("Имя", "first_name"),
+                3: ("Отчество", "second_name"),
+            }
+        },
 
-        elif cmd == 2:
-             add_tested_pile()
+        3: {
+            "title": "Производители",
+            "model": bd.Producer,
+            "add": add_producer,
+            "search": {
+                1: ("Название", "name"),
+            }
+        },
 
-        elif cmd == 3:
-             add_dynamic_test()
+        4: {
+            "title": "Транспорт",
+            "model": bd.Transport,
+            "add": add_transport,
+            "search": {
+                1: ("Марка транспорта", "name"),
+            }
+        },
 
-        elif cmd == 4:
-             add_driving_log()
+        5: {
+            "title": "Молоты",
+            "model": bd.Hammer,
+            "add": add_hammer,
+            "search": {
+                1: ("Наименование", "name"),
+                2: ("Тип молота", "type"),
+            }
+        },
 
-        elif cmd == 5:
-             add_redriving_log()
+        6: {
+            "title": "Объекты",
+            "model": bd.BuildObject,
+            "add": add_build_object,
+            "search": {
+                1: ("Название заказчика", "name"),
+            }
+        },
 
-        elif cmd == 6:
-             add_absolut_mark()
+        7: {
+            "title": "Категории производителей",
+            "model": bd.CategoryProducer,
+            "add": add_category_producer,
+        },
 
-        elif cmd == 7:
-             add_producer()
+        8: {
+            "title": "Категории транспорта",
+            "model": bd.CategoryTransport,
+            "add": add_category_transport,
+        },
+    }
+    # Функции создания словарей
 
-        elif cmd == 8:
-             add_category_producer()
-
-        elif cmd == 9:
-             add_transport()
-
-        elif cmd == 10:
-             add_category_transport()
-
-        elif cmd == 11:
-             add_hammer()
-
-        elif cmd == 12:
-             add_build_object()
-
-        elif cmd == 13:
-             add_solid()
-
-        elif cmd == 14:
-             add_employee()
-
-        else:
-            print("[!] Неизвестная команда.")
-            utils.pause()
-
-
-WORK = {
-    1: (" Испытуемые сваи", bd.TestedPile),
-    2: (" Динамические испытания", bd.DynamicTested),
-    3: (" Забивка", bd.DrivingLog),
-    4: (" Добивка", bd.RedrivingLog),
-    5: (" Абсолютные отметки", bd.AbsolutMark),
-    6: (" Грунты", bd.Solid),
-}
-
-GUIDE = {
-    1: (" Типы свай", bd.TypePile),
-    2: (" Сотрудники", bd.Employee),
-    3:  (" Производители", bd.Producer),
-    4: (" Транспорт", bd.Transport),
-    5: (" Молоты", bd.Hammer),
-    6: (" Объекты", bd.BuildObject),
-    7: (" Категории производителей", bd.CategoryProducer),
-    8: (" Категории транспорта", bd.CategoryTransport),
-}
-
-MODELS = {
-    1: (" Рабочая группа ", WORK),
-    2: (" Справочники ",GUIDE)
-}
-def database_menu():
-    utils.clear()
-    while True:
-        title("Просмотр базы данных")
-        for key, (title, _) in MODELS.items():
-            print(f"[{key}]{title}")
-        print("\n[0] Назад")
-        try:
-            c = int(input("\n[>] Введите номер группы: "))
-        except:
-            continue
-        if c==0:
-            return
-    if c in MODELS:
-            utils.clear()
-
-            if c == 1:
-                while True:
-                    title("Просмотр рабочей группы")
-                    for key, (title, _) in WORK.items():
-                        print(f"[{key}]{title}")
-                    print("\n[0] Назад")
-                    try:
-                        c = int(input("\n[>] Введите номер категории: "))
-                    except:
-                        continue
-                    if c == 0:
-                        return
-                    if c in WORK:
-                        utils.clear()
-                        utils.show_table(WORK[c][1])
-
-            elif c == 2:
-                while True:
-                    title("Просмотр справочников")
-                    for key, (title, _) in GUIDE.items():
-                        print(f"[{key}]{title}")
-                    print("\n[0] Назад")
-                    try:
-                        c = int(input("\n[>] Введите номер категории: "))
-                    except:
-                        continue
-                    if c == 0:
-                        return
-                    if c in GUIDE:
-                        utils.clear()
-                        utils.show_table(GUIDE[c][1])
-
-def delete_menu():
-    while True:
-        utils.title("Удаление записи")
-        for key, value in MODELS.items(): # выводим из модели парключи
-            print(f"[{key}] {value[0]}")
-        print("\n[0] Назад")
-        try:
-            c = int(input("\n[>] Выберите категорию: "))
-        except:
-            continue
-        if c==0:
-            return
-        if c in MODELS:
-            utils.delete_record(MODELS[c][1])
-
-# Функции создания словарей
 def add_employee():
     session = bd.Session()
     utils.title("Добавление сотрудника")
@@ -486,7 +444,6 @@ def add_category_producer():
     utils.pause()
     session.close()
 
-
 def add_transport():
     session = bd.Session()
     utils.title("Добавление транспорта")
@@ -503,7 +460,6 @@ def add_transport():
     print("\n[+] Транспорт успешно добавлен!")
     utils.pause()
     session.close()
-
 
 def add_category_transport():
     session = bd.Session()

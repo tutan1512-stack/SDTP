@@ -6,7 +6,6 @@ from sqlalchemy import (
                         Integer,
                         Float,
                         Date,
-                        UniqueConstraint,
                         ForeignKey # для создания отношений в бд через МодельДанных.Атрибу
  )
 from sqlalchemy.orm import (
@@ -17,7 +16,7 @@ from sqlalchemy.orm import (
                             relationship
 
 )
-from utils import get_appdata_db_path
+from backend.config_path import get_appdata_db_path
 # Абстрактный класс
 class Base(DeclarativeBase):
     pass
