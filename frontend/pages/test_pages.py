@@ -1,25 +1,53 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from backend.services import DatabaseService
+from frontend.dialogs.test_dialog import TestDialog
+from backend.model import *
 
 class TestPage(ttk.Frame):
 
     def __init__(self, parent, controller):
-
         super().__init__(parent)
 
         self.controller = controller
-
+        self.tests = []
         self.create_frames()
         self.create_header()
         self.create_search()
         self.create_table()
         self.create_buttons()
+        self.style = ttk.Style()
+
+        self.style.theme_use("clam")
+
+
+        # Заголовки таблицы
+        self.style.configure(
+            "Treeview.Heading",
+            font=("Segoe UI", 11, "bold"),
+            relief="raised"
+        )
+
+        # Строки таблицы
+        self.style.configure(
+            "Treeview",
+            font=("Segoe UI", 10),
+            rowheight=28
+        )
+
+        # Выделение строки
+        self.style.map(
+            "Treeview",
+            background=[("selected", "#0A64AD")],
+            foreground=[("selected", "white")]
+        )
+        self.refresh()
 
     def create_frames(self):
         self.header_frame = ttk.Frame(self, padding=10)
         self.search_frame = ttk.Frame(self, padding=10)
-        self.table_frame = ttk.Frame(self, padding=10)
+        self.table_frame = ttk.Frame( self,relief="solid",borderwidth=1,padding=5)
         self.button_frame = ttk.Frame(self, padding=10)
         self.header_frame.pack(fill="x")
         self.search_frame.pack(fill="x")
@@ -55,13 +83,11 @@ class TestPage(ttk.Frame):
             command=self.search_test
         ).grid(row=0, column=2, padx=10)
 
-
     # Таблица
     def create_table(self):
         columns = (
             "number",
             "date",
-            "pile",
             "object",
             "hammer",
             "employee"
@@ -71,20 +97,18 @@ class TestPage(ttk.Frame):
             self.table_frame,
             columns=columns,
             show="headings",
-            height=18
+            height=8
         )
 
         self.table.heading("number", text="Номер")
         self.table.heading("date", text="Дата")
-        self.table.heading("pile", text="Свая")
         self.table.heading("object", text="Объект")
         self.table.heading("hammer", text="Молот")
         self.table.heading("employee", text="Ответственный")
-        self.table.column("number", width=90)
-        self.table.column("date", width=100)
-        self.table.column("pile", width=120)
-        self.table.column("object", width=220)
-        self.table.column("hammer", width=150)
+        self.table.column("number", width=20)
+        self.table.column("date", width=80)
+        self.table.column("object", width=300)
+        self.table.column("hammer", width=30)
         self.table.column("employee", width=170)
 
         scrollbar = ttk.Scrollbar(
@@ -96,11 +120,19 @@ class TestPage(ttk.Frame):
         self.table.configure(
             yscrollcommand=scrollbar.set
         )
-
         self.table.pack(side="left", fill="both", expand=True)
 
         scrollbar.pack(side="right", fill="y")
 
+        self.table.tag_configure(
+            "odd",
+            background="white"
+        )
+
+        self.table.tag_configure(
+            "even",
+            background="#f3f6f9"
+        )
 
     # Кнопки
     def create_buttons(self):
@@ -141,17 +173,15 @@ class TestPage(ttk.Frame):
             command=self.close_page
         ).pack(side="right")
 
-
     # Заглушки
     def search_test(self):
         text = self.search_entry.get()
         print(f"Поиск: {text}")
 
     def add_test(self):
-        messagebox.showinfo(
-            "Добавление",
-            "Здесь будет открываться окно создания испытания."
-        )
+        dialog = TestDialog(self)
+        self.wait_window(dialog)
+        self.refresh()
 
     def edit_test(self):
         selected = self.table.selection()
@@ -161,10 +191,20 @@ class TestPage(ttk.Frame):
                 "Выберите испытание."
             )
             return
-        messagebox.showinfo(
-            "Редактирование",
-            "Открыть окно редактирования."
+
+        test_id = int(selected[0])
+        test = next(
+            t
+            for t in self.tests
+            if t.id == test_id
         )
+        dialog = TestDialog(
+            self,
+            test
+        )
+        self.wait_window(dialog)
+        self.refresh()
+
 
     def delete_test(self):
         selected = self.table.selection()
@@ -174,66 +214,60 @@ class TestPage(ttk.Frame):
                 "Выберите запись."
             )
             return
+
         answer = messagebox.askyesno(
             "Удаление",
-            "Удалить выбранное испытание?"
+            "Удалить испытание?"
         )
-        if answer:
-            print("Удаляем запись")
-
+        if not answer:
+            return
+        test_id = int(selected[0])
+        test = DatabaseService.get_by_id(
+            DynamicTested,
+            test_id
+        )
+        DatabaseService.delete(test)
+        self.refresh()
+        
     def open_test(self):
         selected = self.table.selection()
 
         if not selected:
-            messagebox.showwarning(
-                "Просмотр",
-                "Выберите испытание.")
             return
-
-        messagebox.showinfo(
-            "Испытание",
-            "Открыть карточку испытания.")
-
-        if not selected:
-            messagebox.showwarning(
-                "Просмотр",
-                "Выберите испытание.")
-            return
-
-        messagebox.showinfo(
-            "Испытание",
-            "Открыть карточку испытания."
+        test_id = int(selected[0])
+        test = next(
+            (t for t in self.tests if t.id == test_id),
+            None
         )
+        if test is None:
+            return
+
+        self.controller.open_tested_piles(test_id)
 
     def refresh(self):
         for row in self.table.get_children():
             self.table.delete(row)
 
-        self.table.insert(
-            "",
-            "end",
-            values=(
-                "ДИ-001",
-                "20.07.2026",
-                "С120-35",
-                "ЖК Север",
-                "СП-75",
-                "Иванов"
-            )
-        )
+        self.tests = DatabaseService.get_tests()
 
-        self.table.insert(
-            "",
-            "end",
-            values=(
-                "ДИ-002",
-                "22.07.2026",
-                "С90-30",
-                "Школа №5",
-                "СП-76",
-                "Петров"
+        # Заполнить таблицу
+        for i, test in enumerate(self.tests):
+            tag = "even" if i % 2 == 0 else "odd"
+
+            self.table.insert(
+                "",
+                "end",
+                iid=str(test.id),
+                values=(
+                    f"ДИ-{test.number_tested}",
+                    test.date_start,
+                    test.b_object.name_object,
+                    test.hammer.name,
+                    f"{test.employee.last_name} {test.employee.first_name} {test.employee.second_name}"
+                    ),
+               tags=(tag,)
             )
-        )
+
 
     def close_page(self):
         self.controller.show_home()

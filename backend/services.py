@@ -1,7 +1,9 @@
 # файл со служебными функциями
-import backend.connection as cn
+from backend.connection import Session
+from sqlalchemy.orm import joinedload
 from typing import TypeVar
 from datetime import datetime, date
+from backend.model import *
 from sqlalchemy import (
                         func,
                         select
@@ -10,7 +12,108 @@ from sqlalchemy import (
 T = TypeVar("T")
 
 # Дла работы с несколькими сессиями
-session = cn.Session()
+session = Session()
+
+# Универсальный класс для передачи полей моделей на фронт
+
+class DatabaseService:
+    @staticmethod
+    def get_all(model, *relations):
+        session = Session()
+        try:
+            query = session.query(model)
+            for relation in relations:
+                query = query.options(joinedload(relation))
+            return query.all()
+        finally:
+            session.close()
+
+    @staticmethod
+    def get_by_id(model, id_, *relations):
+        session = Session()
+        try:
+            query = session.query(model)
+            for relation in relations:
+                query = query.options(joinedload(relation))
+            return query.filter(model.id == id_).first()
+        finally:
+            session.close()
+
+    @staticmethod
+    def add(obj):
+        session = Session()
+        try:
+            session.add(obj)
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    @staticmethod
+    def delete(obj):
+        session = Session()
+        try:
+            obj = session.merge(obj)
+            session.delete(obj)
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    @staticmethod
+    def update(obj):
+        session = Session()
+        try:
+            session.merge(obj)
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    @staticmethod
+    def get_tests():
+        session = Session()
+        try:
+            return (
+                session.query(DynamicTested)
+                .options(
+
+                    joinedload(DynamicTested.b_object),
+                    joinedload(DynamicTested.employee),
+                    joinedload(DynamicTested.transport),
+                    joinedload(DynamicTested.hammer),
+
+                    joinedload(DynamicTested.piles)
+                        .joinedload(TestedPileInTest.pile)
+                        .joinedload(TestedPile.type_p),
+
+                    joinedload(DynamicTested.piles)
+                        .joinedload(TestedPileInTest.pile)
+                        .joinedload(TestedPile.producers),
+
+                )
+                .all()
+            )
+        finally:
+            session.close()
+
+    @staticmethod
+    def get_one(model, obj_id, options=None):
+        session = Session()
+        try:
+            query = session.query(model)
+            if options:
+                for option in options:
+                    query = query.options(option)
+            return query.filter(model.id == obj_id).first()
+        finally:
+            session.close()
 
 # функция для конвертации временных данных
 def to_date(value):

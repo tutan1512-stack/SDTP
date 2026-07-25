@@ -3,6 +3,8 @@ from tkinter import ttk
 from frontend.pages.test_pages import TestPage
 from frontend.pages.home_page import HomePage
 from frontend.pages.directory_page import DirectoryPage
+from frontend.pages.tested_piles_page import TestedPilesPage
+from frontend.pages.tested_stage_page import PileStagePage
 
 class MainWindow:
     def __init__(self):
@@ -132,7 +134,24 @@ class MainWindow:
         page = DirectoryPage(self.content_frame,self)
         page.pack(fill="both", expand=True)
 
+    def open_tested_piles(self, test_id):
+        self.clear_content()
 
+        page = TestedPilesPage(
+            self.content_frame,
+            self,
+            test_id
+        )
+        page.pack(fill="both", expand=True)
+
+    def open_pile_stage(self, tested_pile_id):
+        self.clear_content()
+        page = PileStagePage(
+            self.content_frame,
+            self,
+            tested_pile_id
+        )
+        page.pack(fill="both", expand=True)
 
     def run(self):
         self.root.mainloop()
