@@ -3,6 +3,8 @@ from tkinter import ttk, messagebox
 from backend.services import DatabaseService
 from backend.model import *
 from sqlalchemy.orm import joinedload
+from frontend.dialogs.link_pile_dialog import LinkPileDialog
+from frontend.dialogs.tested_pile_dialog import TestedPileDialog
 
 class TestedPilesPage(ttk.Frame):
 
@@ -219,16 +221,70 @@ class TestedPilesPage(ttk.Frame):
             )
 
     def add_pile(self):
-        messagebox.showinfo(
-            "Добавление",
-            "Добавление сваи."
-        )
+        linked_ids = {tp.pile_id for tp in self.piles}
+
+        dialog = LinkPileDialog(self, self.test.id, linked_ids)
+        self.wait_window(dialog)
+
+        if dialog.result_linked:
+            self.load_data()
+            self.refresh()
 
     def edit_pile(self):
-        pass
+        selected = self.table.selection()
+        if not selected:
+            messagebox.showwarning(
+                "Редактирование",
+                "Выберите сваю."
+            )
+            return
+
+        tested_pile_id = int(selected[0])
+        tested_pile = next(
+            (tp for tp in self.piles if tp.id == tested_pile_id),
+            None
+        )
+        if tested_pile is None:
+            return
+
+        dialog = TestedPileDialog(self, pile=tested_pile.pile)
+        self.wait_window(dialog)
+
+        if dialog.result is not None:
+            self.load_data()
+            self.refresh()
 
     def delete_pile(self):
-        pass
+        selected = self.table.selection()
+        if not selected:
+            messagebox.showwarning(
+                "Удаление",
+                "Выберите сваю."
+            )
+            return
+
+        answer = messagebox.askyesno(
+            "Удаление",
+            "Открепить сваю от испытания? "
+            "Связанные записи журналов забивки и добивки "
+            "по этой свае также будут удалены."
+        )
+        if not answer:
+            return
+
+        tested_pile_id = int(selected[0])
+        link = DatabaseService.get_by_id(TestedPileInTest, tested_pile_id)
+        if link is None:
+            return
+
+        try:
+            DatabaseService.delete(link)
+        except Exception as e:
+            messagebox.showerror("Ошибка", str(e))
+            return
+
+        self.load_data()
+        self.refresh()
 
     def open_stages(self):
         selected = self.table.selection()
