@@ -1,7 +1,8 @@
 # Функции CRUD для работы в меню
 import backend.services as df
 import backend.utils as utils
-import model as bd
+from backend import model as bd
+import backend.connection as cn 
 from sqlalchemy import  select
 
 def get_groups():
@@ -154,7 +155,7 @@ def get_guide():
     # Функции создания словарей
 
 def add_employee():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление сотрудника")
     data= {
         "last_name": input("[1] Фамилия: "),
@@ -171,7 +172,7 @@ def add_employee():
     session.close()
 
 def add_pile():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление сваи")
     data={
         "name": input("[1] Марка сваи: "),
@@ -191,7 +192,7 @@ def add_pile():
     session.close()
 
 def add_hammer():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление молота")
     data = {
             "name": input("[1] Модель молота: "),
@@ -208,7 +209,7 @@ def add_hammer():
     session.close()
 
 def add_tested_pile():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление испытательной сваи")
 
     data = {
@@ -232,7 +233,7 @@ def add_tested_pile():
     session.close()
 
 def add_dynamic_test():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление динамических испытаний")
     data = {
         "name_organisation":input("[1] Название подрядчика: "),
@@ -305,7 +306,7 @@ def add_dynamic_test():
     session.close()
 
 def add_driving_log():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление данных по забивке")
     tested_id=  utils.choose(
         bd.DynamicTested,
@@ -341,7 +342,7 @@ def add_driving_log():
     session.close()
 
 def add_absolut_mark():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление абсолютных отметок")
 
     data = {
@@ -361,7 +362,7 @@ def add_absolut_mark():
     session.close()
 
 def add_redriving_log():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление данных по добивке")
     tested_id=  utils.choose(
         bd.DynamicTested,
@@ -392,7 +393,7 @@ def add_redriving_log():
     session.close()
 
 def add_solid():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление характеристик грунта")
     data = {
         "tested_id": input("[1] Испытание: "),
@@ -409,7 +410,7 @@ def add_solid():
     session.close()
 
 def add_producer():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление производителя")
     data = {
         "name": input("[1] Название организации: "),
@@ -433,7 +434,7 @@ def add_producer():
     session.close()
 
 def add_category_producer():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление категории производителя")
     data = {
         "name": input("[1] Название категории: "),
@@ -445,7 +446,7 @@ def add_category_producer():
     session.close()
 
 def add_transport():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление транспорта")
     data = {
         "name": input("[1] Название транспорта: "),
@@ -462,7 +463,7 @@ def add_transport():
     session.close()
 
 def add_category_transport():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление категории транспорта")
     data = {
         "name": input("[1] Название категории: "),
@@ -474,7 +475,7 @@ def add_category_transport():
     session.close()
 
 def add_build_object():
-    session = bd.Session()
+    session = cn.Session()
     utils.title("Добавление строительного объекта")
     data = {
         "name": input("[1] Заказчик: "),

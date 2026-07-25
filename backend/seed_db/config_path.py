@@ -1,5 +1,4 @@
 # Конфигуратор пути
-
 import os, sys
 
 def get_appdata_db_path(app_name="MyPythonApp", db_name="database.db"):

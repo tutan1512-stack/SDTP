@@ -1,9 +1,8 @@
 # Функции меню
 
-from backend import utils as utils, crud as crud
+from backend import crud as crud
 import backend.utils as utils
-import model as bd
-from sqlalchemy import  select
+
 
 def menu():
     while True:

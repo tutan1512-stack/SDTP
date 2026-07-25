@@ -1,10 +1,10 @@
 # файл с универсальными функциями меню
-import model as bd
-import os, sys
+import backend.connection as cn
+import os
 from sqlalchemy import  select
 
 def choose(model, title, display=None):
-    session = bd.Session()
+    session = cn.Session()
     try:
         data =session.scalars(select(model)).all()
         # если нет данных выводим
@@ -55,7 +55,7 @@ def title(name):
 def show_table( entity):
     model = entity['model']
     title(f"Просмотр: ({model.__tablename__})")
-    session = bd.Session()
+    session = cn.Session()
     try:
         data = session.query(model).order_by(model.id).all() # передаем очередь словарей из модели
         if not data:
@@ -71,7 +71,7 @@ def show_table( entity):
 
 def delete_record(kwargs):
     choice = choice_menu("Удаление записи", kwargs)
-    session = bd.Session()
+    session = cn.Session()
     try:
         if choice is None:
             print("\n[=] Запись не найдена\n")
@@ -116,7 +116,7 @@ def choice_menu(text, kwargs):
 
 def search_menu(entity):
     model = entity["model"]
-    session = bd.Session()
+    session = cn.Session()
     try:
         while True:
             title(f"Поиск: {entity['title']}")

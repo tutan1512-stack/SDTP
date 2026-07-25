@@ -1,4 +1,5 @@
-from typing import TypeVar # Для использования шаблонов
+
+from backend.connection import engine
 from datetime import date# Тип данных времени
 from sqlalchemy import (
                         create_engine, # для создания движка бд
@@ -16,23 +17,11 @@ from sqlalchemy.orm import (
                             relationship
 
 )
-from backend.config_path import get_appdata_db_path
+
 # Абстрактный класс
 class Base(DeclarativeBase):
     pass
 
-# Шаблонная переменная
-T = TypeVar("T")
-
-# Создание абсолютного пути до бд
-#BASE_DIR = Path(__file__).resolve().parent
-#DB_PATH = BASE_DIR / "sdtp.bd"
-
-# Подключаем бд без логирования
-engine = create_engine(f'sqlite:///{get_appdata_db_path()}', echo = False)
-
-# Дла работы с несколькими сессиями
-Session = sessionmaker(bind=engine)
 
 # Класс характеристики свай /Программист/(Справочник)
 class TypePile(Base):

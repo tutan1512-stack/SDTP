@@ -1,9 +1,9 @@
 # файл для генерации справочных материалов
-
-import model as bd
+import backend.connection as cn
+from backend import model as bd
 import backend.services as df
 
-session = bd.Session()
+session = cn.Session()
 
 
 # Категория производства

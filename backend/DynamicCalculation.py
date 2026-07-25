@@ -1,6 +1,6 @@
 # файл для проведения расчетов
 
-import model as bd
+from backend import model as bd
 from sqlalchemy import func, select
 from math import sqrt
 

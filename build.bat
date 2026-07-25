@@ -1,23 +1,69 @@
 @echo off
 chcp 65001 > nul
-echo === Начало сборки приложения ===
+title SDIS Build
 
-REM 1. Проверяем, существует ли папка виртуального окружения. Если нет — создаем.
-if not exist .venv (
-    echo [1/4] Создание виртуального окружения .venv...
-    python -m venv .venv
-) else (
-    echo [1/4] Виртуальное окружение .venv уже существует.
+echo ========================================
+echo        Сборка проекта СДИС
+echo ========================================
+echo.
+
+:: Переход в каталог, где лежит bat-файл
+cd /d "%~dp0"
+
+:: Проверяем наличие виртуального окружения
+if not exist ".venv\Scripts\python.exe" (
+    echo [!] Виртуальное окружение не найдено.
+    pause
+    exit /b 1
 )
 
-REM 2. Активируем виртуальное окружение и устанавливаем зависимости
-echo [2/4] Активация окружения и установка зависимостей из requirements.txt...
-call .\.venv\Scripts\activate.bat && pip install -r .\requirements.txt
+echo [1/5] Обновление PyInstaller...
+call .venv\Scripts\python.exe -m pip install --upgrade pyinstaller
 
-REM 3. Запуск сборки через PyInstaller
-echo [3/4] Запуск сборки приложения (pyinstaller)...
-call .\.venv\Scripts\activate.bat && pyinstaller --onefile ./menu.py
+if errorlevel 1 (
+    echo.
+    echo [!] Ошибка установки PyInstaller.
+    pause
+    exit /b 1
+)
 
-REM 4. Финал
-echo [4/4] Сборка успешно завершена! Ищите файл menu.exe в папке dist.
+echo.
+echo [2/5] Очистка предыдущей сборки...
+
+if exist build rmdir /S /Q build
+if exist dist rmdir /S /Q dist
+
+echo.
+echo [3/5] Сборка приложения...
+
+call .venv\Scripts\python.exe -m PyInstaller SDIS.spec
+
+if errorlevel 1 (
+    echo.
+    echo ========================================
+    echo          СБОРКА ЗАВЕРШИЛАСЬ С ОШИБКОЙ
+    echo ========================================
+    pause
+    exit /b 1
+)
+
+echo.
+echo [4/5] Проверка результата...
+
+if not exist "dist\SDIS.exe" (
+    echo [!] Исполняемый файл не найден.
+    pause
+    exit /b 1
+)
+
+echo.
+echo ========================================
+echo      Сборка успешно завершена!
+echo ========================================
+echo.
+echo Исполняемый файл:
+echo.
+echo     dist\SDIS.exe
+echo.
+
 pause
