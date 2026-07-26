@@ -9,22 +9,18 @@ from backend.seed_db.config_path import get_appdata_db_path
 
 
 def get_log_path():
-    """
-    Кладём error.log рядом с базой данных: в AppData при собранном .exe,
-    в backend/seed_db при запуске из исходников.
-    """
     db_path = get_appdata_db_path()
     return os.path.join(os.path.dirname(db_path), "error.log")
 
 
 def handle_callback_exception(exc_type, exc_value, exc_traceback):
-    """
-    Tkinter по умолчанию просто печатает исключения из обработчиков
-    событий (нажатия кнопок и т.д.) в stderr и продолжает работу —
-    при console=False это означает, что ошибка исчезает бесследно,
-    а пользователь видит, будто "ничего не произошло". Логируем
-    и показываем сообщение, не прерывая работу приложения.
-    """
+
+    # Tkinter по умолчанию просто печатает исключения из обработчиков
+    # событий (нажатия кнопок и т.д.) в stderr и продолжает работу —
+    # при console=False это означает, что ошибка исчезает бесследно,
+    # а пользователь видит, будто "ничего не произошло". Логируем
+    # и показываем сообщение, не прерывая работу приложения.
+
     log_path = get_log_path()
     try:
         with open(log_path, "w", encoding="utf-8") as f:

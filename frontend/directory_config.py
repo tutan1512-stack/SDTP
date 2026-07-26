@@ -229,8 +229,6 @@ DIRECTORIES = {
 
 
 def get_relations(config):
-    """Список relationship-атрибутов модели, которые нужно подгрузить
-    (joinedload) для отображения FK-колонок в таблице."""
     relations = []
     for field in config["fields"]:
         if field["type"] == "fk":
@@ -239,7 +237,6 @@ def get_relations(config):
 
 
 def resolve_path(obj, path):
-    """Достаёт значение по составному пути 'category.name' с защитой от None."""
     value = obj
     for part in path.split("."):
         if value is None:
