@@ -5,13 +5,22 @@ from backend.services import DatabaseService
 from frontend.dialogs.test_dialog import TestDialog
 from backend.model import *
 
+
 class TestPage(ttk.Frame):
+    # (подпись в комбобоксе, функция извлечения значения из объекта DynamicTested)
+    SEARCH_FIELDS = [
+        ("Номер испытания", lambda t: str(t.number_tested)),
+        ("Дата испытаний", lambda t: t.date_start.strftime("%d.%m.%Y")),
+        ("Объект", lambda t: t.b_object.name_object),
+        ("Ответственный", lambda t: f"{t.employee.last_name} {t.employee.first_name} {t.employee.second_name}"),
+    ]
 
     def __init__(self, parent, controller):
         super().__init__(parent)
 
         self.controller = controller
         self.tests = []
+        self.all_tests = []
         self.create_frames()
         self.create_header()
         self.create_search()
@@ -20,7 +29,6 @@ class TestPage(ttk.Frame):
         self.style = ttk.Style()
 
         self.style.theme_use("clam")
-
 
         # Заголовки таблицы
         self.style.configure(
@@ -47,7 +55,7 @@ class TestPage(ttk.Frame):
     def create_frames(self):
         self.header_frame = ttk.Frame(self, padding=10)
         self.search_frame = ttk.Frame(self, padding=10)
-        self.table_frame = ttk.Frame( self,relief="solid",borderwidth=1,padding=5)
+        self.table_frame = ttk.Frame(self, relief="solid", borderwidth=1, padding=5)
         self.button_frame = ttk.Frame(self, padding=10)
         self.header_frame.pack(fill="x")
         self.search_frame.pack(fill="x")
@@ -67,21 +75,37 @@ class TestPage(ttk.Frame):
     def create_search(self):
         ttk.Label(
             self.search_frame,
-            text="Поиск:"
+            text="Искать по:"
         ).grid(row=0, column=0, padx=5)
+
+        self.search_field_cb = ttk.Combobox(
+            self.search_frame,
+            state="readonly",
+            width=20,
+            values=[label for label, _ in self.SEARCH_FIELDS]
+        )
+        self.search_field_cb.current(0)
+        self.search_field_cb.grid(row=0, column=1, padx=5)
 
         self.search_entry = ttk.Entry(
             self.search_frame,
             width=40
         )
 
-        self.search_entry.grid(row=0, column=1)
+        self.search_entry.grid(row=0, column=2)
+        self.search_entry.bind("<Return>", lambda event: self.search_test())
 
         ttk.Button(
             self.search_frame,
             text="Найти",
             command=self.search_test
-        ).grid(row=0, column=2, padx=10)
+        ).grid(row=0, column=3, padx=10)
+
+        ttk.Button(
+            self.search_frame,
+            text="Сбросить",
+            command=self.reset_search
+        ).grid(row=0, column=4)
 
     # Таблица
     def create_table(self):
@@ -173,10 +197,30 @@ class TestPage(ttk.Frame):
             command=self.close_page
         ).pack(side="right")
 
-    # Заглушки
     def search_test(self):
-        text = self.search_entry.get()
-        print(f"Поиск: {text}")
+        text = self.search_entry.get().strip()
+
+        if not text:
+            messagebox.showwarning("Поиск", "Введите текст для поиска.")
+            return
+
+        field_index = self.search_field_cb.current()
+        if field_index < 0:
+            return
+
+        _, extractor = self.SEARCH_FIELDS[field_index]
+        text_lower = text.lower()
+
+        self.tests = [
+            t for t in self.all_tests
+            if text_lower in extractor(t).lower()
+        ]
+        self.render_rows()
+
+    def reset_search(self):
+        self.search_entry.delete(0, "end")
+        self.tests = self.all_tests
+        self.render_rows()
 
     def add_test(self):
         dialog = TestDialog(self)
@@ -205,7 +249,6 @@ class TestPage(ttk.Frame):
         self.wait_window(dialog)
         self.refresh()
 
-
     def delete_test(self):
         selected = self.table.selection()
         if not selected:
@@ -228,7 +271,7 @@ class TestPage(ttk.Frame):
         )
         DatabaseService.delete(test)
         self.refresh()
-        
+
     def open_test(self):
         selected = self.table.selection()
 
@@ -245,10 +288,13 @@ class TestPage(ttk.Frame):
         self.controller.open_tested_piles(test_id)
 
     def refresh(self):
+        self.all_tests = DatabaseService.get_tests()
+        self.tests = self.all_tests
+        self.render_rows()
+
+    def render_rows(self):
         for row in self.table.get_children():
             self.table.delete(row)
-
-        self.tests = DatabaseService.get_tests()
 
         # Заполнить таблицу
         for i, test in enumerate(self.tests):
@@ -264,10 +310,9 @@ class TestPage(ttk.Frame):
                     test.b_object.name_object,
                     test.hammer.name,
                     f"{test.employee.last_name} {test.employee.first_name} {test.employee.second_name}"
-                    ),
-               tags=(tag,)
+                ),
+                tags=(tag,)
             )
-
 
     def close_page(self):
         self.controller.show_home()

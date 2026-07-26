@@ -7,16 +7,6 @@ from frontend.dialogs.tested_pile_dialog import TestedPileDialog
 
 
 class LinkPileDialog(tk.Toplevel):
-    """
-    Диалог привязки испытуемой сваи (из справочника) к конкретному
-    динамическому испытанию. Позволяет выбрать уже существующую сваю,
-    не привязанную к этому испытанию, либо создать новую и сразу
-    привязать её.
-
-    После успешной привязки self.result_linked становится True —
-    вызывающая страница должна обновить свои данные.
-    """
-
     def __init__(self, parent, test_id, linked_pile_ids):
         super().__init__(parent)
 
@@ -66,7 +56,19 @@ class LinkPileDialog(tk.Toplevel):
         ).pack(side="left", padx=5)
 
     def refresh_piles(self):
-        all_piles = DatabaseService.get_all(TestedPile)
+        try:
+            all_piles = DatabaseService.get_all(
+                TestedPile,
+                TestedPile.type_p,
+                TestedPile.producers
+            )
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось загрузить список свай:\n{e}")
+            self.available_piles = []
+            self.pile_cb.configure(values=[], state="disabled")
+            self.pile_cb.set("")
+            return
+
         self.available_piles = [
             p for p in all_piles
             if p.id not in self.linked_pile_ids

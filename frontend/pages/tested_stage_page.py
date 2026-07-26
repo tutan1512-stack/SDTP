@@ -7,7 +7,11 @@ from backend.services import DatabaseService
 from backend.model import (
     TestedPileInTest,
     TestedPile,
+    DrivingLog,
+    RedrivingLog,
 )
+from frontend.dialogs.driving_dialog import DrivingLogDialog
+from frontend.dialogs.redriving_dialog import RedrivingLogDialog
 
 
 class PileStagePage(ttk.Frame):
@@ -163,8 +167,14 @@ class PileStagePage(ttk.Frame):
     def create_buttons(self):
         ttk.Button(
             self.button_frame,
-            text="Добавить",
-            command=self.add_stage
+            text="Добавить забивку",
+            command=self.add_driving_stage
+        ).pack(side="left", padx=5)
+
+        ttk.Button(
+            self.button_frame,
+            text="Добавить добивку",
+            command=self.add_redriving_stage
         ).pack(side="left", padx=5)
 
         ttk.Button(
@@ -193,6 +203,7 @@ class PileStagePage(ttk.Frame):
             self.table.insert(
                 "",
                 "end",
+                iid=f"driving:{log.id}",
                 values=(
                     "Забивка",
                     log.step_number,
@@ -211,6 +222,7 @@ class PileStagePage(ttk.Frame):
             self.table.insert(
                 "",
                 "end",
+                iid=f"redriving:{log.id}",
                 values=(
                     "Добивка",
                     log.step_number,
@@ -223,16 +235,90 @@ class PileStagePage(ttk.Frame):
                     f"Отдых: {log.time_sleep} суток"
                 )
             )
-            self.create_info()
 
-    def add_stage(self):
-        messagebox.showinfo("Добавление","Добавить этап")
+    def add_driving_stage(self):
+        dialog = DrivingLogDialog(self, self.tested_pile.id)
+        self.wait_window(dialog)
+
+        if dialog.result is not None:
+            self.load_data()
+            self.refresh()
+
+    def add_redriving_stage(self):
+        dialog = RedrivingLogDialog(self, self.tested_pile.id)
+        self.wait_window(dialog)
+
+        if dialog.result is not None:
+            self.load_data()
+            self.refresh()
 
     def edit_stage(self):
-        pass
+        selected = self.table.selection()
+        if not selected:
+            messagebox.showwarning(
+                "Редактирование",
+                "Выберите этап."
+            )
+            return
+
+        log_type, log_id = selected[0].split(":")
+        log_id = int(log_id)
+
+        if log_type == "driving":
+            log = next(
+                (l for l in self.tested_pile.driving_logs if l.id == log_id),
+                None
+            )
+            if log is None:
+                return
+            dialog = DrivingLogDialog(self, self.tested_pile.id, log=log)
+        else:
+            log = next(
+                (l for l in self.tested_pile.redriving_logs if l.id == log_id),
+                None
+            )
+            if log is None:
+                return
+            dialog = RedrivingLogDialog(self, self.tested_pile.id, log=log)
+
+        self.wait_window(dialog)
+
+        if dialog.result is not None:
+            self.load_data()
+            self.refresh()
 
     def delete_stage(self):
-        pass
+        selected = self.table.selection()
+        if not selected:
+            messagebox.showwarning(
+                "Удаление",
+                "Выберите этап."
+            )
+            return
+
+        answer = messagebox.askyesno(
+            "Удаление",
+            "Удалить выбранный этап?"
+        )
+        if not answer:
+            return
+
+        log_type, log_id = selected[0].split(":")
+        log_id = int(log_id)
+
+        model = DrivingLog if log_type == "driving" else RedrivingLog
+        log = DatabaseService.get_by_id(model, log_id)
+        if log is None:
+            return
+
+        try:
+            DatabaseService.delete(log)
+        except Exception as e:
+            messagebox.showerror("Ошибка", str(e))
+            return
+
+        self.load_data()
+        self.refresh()
 
     def back(self):
         self.controller.open_tested_piles(
