@@ -50,7 +50,7 @@ if errorlevel 1 (
 echo.
 echo [4/5] Проверка результата...
 
-if not exist "dist\SDIS.exe" (
+if not exist "dist\SDIS\SDIS.exe" (
     echo [!] Исполняемый файл не найден.
     pause
     exit /b 1
@@ -63,7 +63,7 @@ echo ========================================
 echo.
 echo Исполняемый файл:
 echo.
-echo     dist\SDIS.exe
+echo     dist\SDIS\SDIS.exe
 echo.
 
 pause
